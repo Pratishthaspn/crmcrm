@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+
+{% block content %}
+<!-- ====================================================================
+     ANALYTICS SUMMARY KPI CARDS
+     ==================================================================== -->
+<div class="stats-grid">
+  
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Total Customers</div>
+      <div class="stat-value">{{ reports.total_customers }}</div>
+      <div class="stat-desc">Entire recorded directory</div>
+    </div>
+    <div class="stat-icon blue">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">New This Month</div>
+      <div class="stat-value">{{ reports.new_this_month }}</div>
+      <div class="stat-desc">Acquired within current month</div>
+    </div>
+    <div class="stat-icon green">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Completed Follow-ups</div>
+      <div class="stat-value">{{ reports.completed_followups }}</div>
+      <div class="stat-desc">Successfully resolved tasks</div>
+    </div>
+    <div class="stat-icon indigo">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Total Interactions</div>
+      <div class="stat-value">{{ reports.total_interactions }}</div>
+      <div class="stat-desc">Across all communication channels</div>
+    </div>
+    <div class="stat-icon amber">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================================================================
+     VISUAL CHARTS SECTION
+     ==================================================================== -->
+<div class="charts-grid">
+  
+  <!-- Chart 1: Customers by Status -->
+  <div class="chart-card">
+    <h4>
+      <span>Customers by Status</span>
+      <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Distribution</span>
+    </h4>
+    <div class="chart-container">
+      <canvas id="customerStatusChart"></canvas>
+    </div>
+    <div style="margin-top: 14px; display: flex; justify-content: space-around; font-size: 0.78rem; color: #64748b; border-top: 1px solid var(--border-light); padding-top: 10px;">
+      <span>🟢 Active: <strong>{{ reports.customer_status.Active }}</strong></span>
+      <span>⚪ Inactive: <strong>{{ reports.customer_status.Inactive }}</strong></span>
+      <span>🟡 Pending: <strong>{{ reports.customer_status.Pending }}</strong></span>
+    </div>
+  </div>
+
+  <!-- Chart 2: Interactions by Type -->
+  <div class="chart-card">
+    <h4>
+      <span>Interactions by Type</span>
+      <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Channel Usage</span>
+    </h4>
+    <div class="chart-container">
+      <canvas id="interactionTypesChart"></canvas>
+    </div>
+    <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; font-size: 0.78rem; color: #64748b; border-top: 1px solid var(--border-light); padding-top: 10px;">
+      <span>Call: <strong>{{ reports.interaction_types.Call }}</strong></span>
+      <span>Email: <strong>{{ reports.interaction_types.Email }}</strong></span>
+      <span>Meeting: <strong>{{ reports.interaction_types.Meeting }}</strong></span>
+      <span>WhatsApp: <strong>{{ reports.interaction_types.WhatsApp }}</strong></span>
+      <span>Other: <strong>{{ reports.interaction_types.Other }}</strong></span>
+    </div>
+  </div>
+
+  <!-- Chart 3: Follow-ups Priority Breakdown -->
+  <div class="chart-card">
+    <h4>
+      <span>Follow-ups by Priority</span>
+      <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">Urgency Level</span>
+    </h4>
+    <div class="chart-container">
+      <canvas id="followupsPriorityChart"></canvas>
+    </div>
+    <div style="margin-top: 14px; display: flex; justify-content: space-around; font-size: 0.78rem; color: #64748b; border-top: 1px solid var(--border-light); padding-top: 10px;">
+      <span>🔴 High: <strong>{{ reports.followup_priority.High }}</strong></span>
+      <span>🟡 Med: <strong>{{ reports.followup_priority.Medium }}</strong></span>
+      <span>🟢 Low: <strong>{{ reports.followup_priority.Low }}</strong></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Viva Explanation Box on Reports -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>How Reports are Computed (Viva Explanation)</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p style="font-size: 0.88rem; color: #334155; line-height: 1.6;">
+      In this system, analytics are calculated dynamically using SQL aggregate functions such as 
+      <code>SELECT COUNT(*) FROM ... GROUP BY status</code> and <code>GROUP BY type</code>.
+      These queries execute directly on the local <strong>SQLite3 database</strong> and are structured into clean Python dictionaries inside <code>models.py</code>. 
+      The results are rendered into responsive charts on the frontend using <strong>Chart.js</strong>, with an automatic pure-CSS fallback if running offline.
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Safely inject serialized JSON data computed by Flask backend
+  const reportsData = {{ reports | tojson }};
+  renderReportsCharts(reportsData);
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+{% block page_title %}Application Settings{% endblock %}
+
+{% block content %}
+<div style="max-width: 720px;">
+
+  <!-- ====================================================================
+       BUSINESS PROFILE SETTINGS
+       ==================================================================== -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <span>Business Information</span>
+      </div>
+    </div>
+    
+    <form action="{{ url_for('crm.settings_page') }}" method="POST">
+      <div class="card-body">
+        
+        <div class="form-group">
+          <label class="form-label" for="setting_business_name">Business Name <span class="required">*</span></label>
+          <input type="text" id="setting_business_name" name="business_name" class="form-control" value="{{ settings.business_name }}" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="setting_owner_email">Contact Email <span class="required">*</span></label>
+            <input type="email" id="setting_owner_email" name="owner_email" class="form-control" value="{{ settings.owner_email }}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="setting_owner_phone">Contact Phone <span class="required">*</span></label>
+            <input type="tel" id="setting_owner_phone" name="owner_phone" class="form-control" value="{{ settings.owner_phone }}" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="setting_currency">Currency Symbol</label>
+            <input type="text" id="setting_currency" name="currency" class="form-control" value="{{ settings.currency or '₹' }}" style="max-width: 140px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="setting_theme">Interface Theme</label>
+            <select id="setting_theme" name="theme" class="form-control">
+              <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Modern Clean SaaS Light</option>
+              <option value="indigo" {% if settings.theme == 'indigo' %}selected{% endif %}>Indigo Professional</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ====================================================================
+       DEMO TOOLS: RESET SAMPLE DATA (For Viva & Evaluation)
+       ==================================================================== -->
+  <div class="card" style="border-color: #fde68a;">
+    <div class="card-header" style="background-color: #fffbeb;">
+      <div class="card-title" style="color: #92400e;">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Demo & Viva Utility: Re-seed Sample Data</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 0.88rem; color: #475569; margin-bottom: 14px; line-height: 1.5;">
+        Need to reset the database back to clean sample data before presenting to your professor?
+        Clicking this button repopulates the 10 standard demo customers, 15+ interactions, and 8+ scheduled follow-ups.
+      </p>
+      <form action="{{ url_for('crm.reset_db_action') }}" method="POST" onsubmit="return confirm('Reset all data back to the default sample records? Any newly added test records will be refreshed.');">
+        <button type="submit" class="btn btn-secondary" style="border-color: #f59e0b; color: #b45309;">
+          ↻ Reset Database to Sample Records
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       PROJECT CODE EXPORT & DOWNLOAD (ALL 16 FILES)
+       ==================================================================== -->
+  <div class="card" style="border-color: #bfdbfe;">
+    <div class="card-header" style="background-color: #eff6ff;">
+      <div class="card-title" style="color: #1e40af;">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span>Download Complete Project (All 16 Files)</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 0.88rem; color: #475569; margin-bottom: 14px; line-height: 1.5;">
+        Download the entire project source code packaged into a clean, ready-to-run ZIP archive containing all 16 essential files with proper folder structure.
+      </p>
+      
+      <div style="margin-bottom: 16px;">
+        <a href="{{ url_for('crm.download_project_zip') }}" class="btn btn-primary" style="padding: 10px 20px; font-weight: 600;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          <span>Download All 16 Files as ZIP (.zip)</span>
+        </a>
+      </div>
+
+      <details style="font-size: 0.84rem; color: #64748b; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 10px 14px;">
+        <summary style="cursor: pointer; font-weight: 600; color: #334155;">View Individual Download Links for All 16 Files</summary>
+        <ul style="margin-top: 10px; margin-left: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <li><a href="{{ url_for('crm.download_single_file', filepath='app.py') }}">app.py</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='database.py') }}">database.py</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='models.py') }}">models.py</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='routes.py') }}">routes.py</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='requirements.txt') }}">requirements.txt</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='README.md') }}">README.md</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/base.html') }}">templates/base.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/dashboard.html') }}">templates/dashboard.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/customers.html') }}">templates/customers.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/customer_details.html') }}">templates/customer_details.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/followups.html') }}">templates/followups.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/interactions.html') }}">templates/interactions.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/reports.html') }}">templates/reports.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='templates/settings.html') }}">templates/settings.html</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='static/css/style.css') }}">static/css/style.css</a></li>
+          <li><a href="{{ url_for('crm.download_single_file', filepath='static/js/script.js') }}">static/js/script.js</a></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <!-- College Project Credit Card -->
+  <div class="card">
+    <div class="card-body" style="font-size: 0.84rem; color: #64748b; line-height: 1.6;">
+      <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">CRM - College Python Mini Project</div>
+      <div>Technology Stack: Python 3, Flask, SQLite3, Jinja2, Vanilla CSS3 & JS</div>
+      <div>Designed for clear code readability, zero bloated third-party framework overhead, and straightforward viva defense.</div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

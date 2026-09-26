@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Customers Directory{% endblock %}
+{% block page_title %}Customer Management{% endblock %}
+
+{% block content %}
+<!-- ====================================================================
+     SEARCH, FILTER & ACTION BAR
+     ==================================================================== -->
+<div class="card" style="margin-bottom: 20px;">
+  <div class="card-body" style="padding: 16px 20px;">
+    <div class="table-header-bar" style="margin-bottom: 0;">
+      
+      <!-- Instant Client Search + Server Search Support -->
+      <form action="{{ url_for('crm.customers_list') }}" method="GET" class="search-box" style="display: flex; gap: 8px;">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input 
+          type="text" 
+          name="search" 
+          id="clientTableSearch"
+          class="search-input" 
+          placeholder="Search by name, company, email, or phone..." 
+          value="{{ search_query }}"
+        >
+        {% if status_filter and status_filter != 'All' %}
+          <input type="hidden" name="status" value="{{ status_filter }}">
+        {% endif %}
+        {% if search_query %}
+          <a href="{{ url_for('crm.customers_list', status=status_filter) }}" class="btn btn-secondary btn-sm" title="Clear Search">
+            ✕
+          </a>
+        {% endif %}
+      </form>
+
+      <!-- Status Filter Tabs -->
+      <div class="filter-group">
+        <a href="{{ url_for('crm.customers_list', search=search_query, status='All') }}" 
+           class="filter-tab {% if status_filter == 'All' or not status_filter %}active{% endif %}">
+          All
+        </a>
+        <a href="{{ url_for('crm.customers_list', search=search_query, status='Active') }}" 
+           class="filter-tab {% if status_filter == 'Active' %}active{% endif %}">
+          Active
+        </a>
+        <a href="{{ url_for('crm.customers_list', search=search_query, status='Pending') }}" 
+           class="filter-tab {% if status_filter == 'Pending' %}active{% endif %}">
+          Pending
+        </a>
+        <a href="{{ url_for('crm.customers_list', search=search_query, status='Inactive') }}" 
+           class="filter-tab {% if status_filter == 'Inactive' %}active{% endif %}">
+          Inactive
+        </a>
+      </div>
+
+      <!-- Action Button -->
+      <div>
+        <button type="button" class="btn btn-primary" data-modal-open="addCustomerModal">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>+ Add Customer</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     CUSTOMERS TABLE CARD
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <span>Customer Directory ({{ customers | length }} Records)</span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Company</th>
+          <th>Status</th>
+          <th>Date Added</th>
+          <th>Last Contact</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in customers %}
+          <tr>
+            <td style="font-weight: 600; color: #64748b; font-size: 0.8rem;">
+              #CUST-{{ c.id }}
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="avatar-circle" style="width: 28px; height: 28px; font-size: 0.72rem; flex-shrink: 0;">
+                  {{ c.name | initials }}
+                </div>
+                <a href="{{ url_for('crm.customer_details', customer_id=c.id) }}" style="font-weight: 600; color: #0f172a;">
+                  {{ c.name }}
+                </a>
+              </div>
+            </td>
+            <td>
+              <a href="mailto:{{ c.email }}" style="color: #475569;">{{ c.email }}</a>
+            </td>
+            <td>
+              <a href="tel:{{ c.phone }}" style="color: #475569;">{{ c.phone }}</a>
+            </td>
+            <td>
+              {{ c.company or '<span style="color:#94a3b8;">None</span>' | safe }}
+            </td>
+            <td>
+              <span class="badge {{ c.status | badge_color }}">{{ c.status }}</span>
+            </td>
+            <td style="font-size: 0.8rem; color: #64748b; white-space: nowrap;">
+              {{ c.created_at }}
+            </td>
+            <td style="font-size: 0.8rem; color: #64748b; white-space: nowrap;">
+              {{ c.last_contact or 'Never' }}
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                
+                <!-- View Details -->
+                <a href="{{ url_for('crm.customer_details', customer_id=c.id) }}" class="btn btn-secondary btn-sm" title="View Customer Details">
+                  View
+                </a>
+
+                <!-- Edit Button (Loads data into edit modal via data-* attributes) -->
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-sm btn-edit-customer"
+                  data-id="{{ c.id }}"
+                  data-name="{{ c.name }}"
+                  data-email="{{ c.email }}"
+                  data-phone="{{ c.phone }}"
+                  data-company="{{ c.company or '' }}"
+                  data-address="{{ c.address or '' }}"
+                  data-status="{{ c.status }}"
+                  data-notes="{{ c.notes or '' }}"
+                  title="Edit Customer"
+                >
+                  Edit
+                </button>
+
+                <!-- Delete Button (Triggers universal confirmation modal) -->
+                <button 
+                  type="button" 
+                  class="btn btn-icon danger btn-confirm-delete"
+                  data-action="{{ url_for('crm.customer_delete', customer_id=c.id) }}"
+                  data-title="customer '{{ c.name }}'"
+                  title="Delete Customer"
+                >
+                  <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr class="no-records-row">
+            <td colspan="9">
+              <div class="empty-state">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <h4>No Customers Found</h4>
+                <p>No customer records match your filter criteria or search keyword.</p>
+                <button type="button" class="btn btn-primary btn-sm" data-modal-open="addCustomerModal">
+                  + Add New Customer
+                </button>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-footer" style="justify-content: space-between;">
+    <span style="font-size: 0.78rem; color: #64748b;">Showing {{ customers | length }} customer records</span>
+    <span style="font-size: 0.78rem; color: #64748b;">SQLite3 Database Integration</span>
+  </div>
+</div>
+
+<!-- ====================================================================
+     EDIT CUSTOMER MODAL
+     ==================================================================== -->
+<div class="modal-overlay" id="editCustomerModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Customer Details</h3>
+      <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+    </div>
+    <form id="editCustomerForm" method="POST">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit_customer_name">Full Name <span class="required">*</span></label>
+            <input type="text" id="edit_customer_name" name="name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit_customer_company">Company / Business</label>
+            <input type="text" id="edit_customer_company" name="company" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit_customer_email">Email Address <span class="required">*</span></label>
+            <input type="email" id="edit_customer_email" name="email" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit_customer_phone">Phone Number <span class="required">*</span></label>
+            <input type="tel" id="edit_customer_phone" name="phone" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit_customer_status">Customer Status</label>
+            <select id="edit_customer_status" name="status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Pending">Pending</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit_customer_address">Address / City</label>
+            <input type="text" id="edit_customer_address" name="address" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit_customer_notes">Notes / Observations</label>
+          <textarea id="edit_customer_notes" name="notes" class="form-control"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

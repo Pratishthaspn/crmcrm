@@ -1,0 +1,3 @@
+# CRM - Python Dependencies
+# Lightweight, standard dependencies for college mini project
+Flask>=3.0.0

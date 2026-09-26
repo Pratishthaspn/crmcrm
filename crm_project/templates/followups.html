@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Follow-ups Schedule{% endblock %}
+{% block page_title %}Follow-up Management{% endblock %}
+
+{% block content %}
+<!-- ====================================================================
+     FILTER & ACTION BAR
+     ==================================================================== -->
+<div class="card" style="margin-bottom: 20px;">
+  <div class="card-body" style="padding: 16px 20px;">
+    <div class="table-header-bar" style="margin-bottom: 0;">
+      
+      <!-- Instant Client Search -->
+      <div class="search-box">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input 
+          type="text" 
+          id="clientTableSearch"
+          class="search-input" 
+          placeholder="Search by customer name or task reason..." 
+        >
+      </div>
+
+      <!-- Status Filter Tabs -->
+      <div class="filter-group">
+        <a href="{{ url_for('crm.followups_list', status='All') }}" 
+           class="filter-tab {% if status_filter == 'All' or not status_filter %}active{% endif %}">
+          All Tasks
+        </a>
+        <a href="{{ url_for('crm.followups_list', status='Pending') }}" 
+           class="filter-tab {% if status_filter == 'Pending' %}active{% endif %}">
+          Pending
+        </a>
+        <a href="{{ url_for('crm.followups_list', status='Completed') }}" 
+           class="filter-tab {% if status_filter == 'Completed' %}active{% endif %}">
+          Completed
+        </a>
+      </div>
+
+      <!-- Action Button -->
+      <div>
+        <button type="button" class="btn btn-primary" data-modal-open="addFollowupModal">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>+ Schedule Follow-up</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     FOLLOW-UPS TABLE
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Follow-up Reminders ({{ followups | length }} Tasks)</span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Follow-up Date</th>
+          <th>Reason / Action Required</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fu in followups %}
+          <tr>
+            <td>
+              <div style="font-weight: 600;">
+                <a href="{{ url_for('crm.customer_details', customer_id=fu.customer_id) }}">
+                  {{ fu.customer_name }}
+                </a>
+              </div>
+              <div style="font-size: 0.74rem; color: #64748b;">
+                {{ fu.customer_company or fu.customer_phone }}
+              </div>
+            </td>
+            <td style="font-weight: 600; font-size: 0.84rem; white-space: nowrap;">
+              {{ fu.follow_up_date }}
+            </td>
+            <td style="font-size: 0.88rem; color: #1e293b; max-width: 340px;">
+              {{ fu.reason }}
+            </td>
+            <td>
+              <span class="badge {{ fu.priority | badge_color }}">{{ fu.priority }}</span>
+            </td>
+            <td>
+              <span class="badge {{ fu.status | badge_color }}">{{ fu.status }}</span>
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                
+                <!-- Toggle status button -->
+                <form action="{{ url_for('crm.followup_toggle', followup_id=fu.id) }}" method="POST" style="margin: 0; display: inline;">
+                  {% if fu.status == 'Pending' %}
+                    <button type="submit" class="btn btn-success btn-sm" title="Mark as Completed">
+                      ✓ Done
+                    </button>
+                  {% else %}
+                    <button type="submit" class="btn btn-secondary btn-sm" title="Re-open Follow-up">
+                      Reopen
+                    </button>
+                  {% endif %}
+                </form>
+
+                <!-- Edit Button -->
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-sm btn-edit-followup"
+                  data-id="{{ fu.id }}"
+                  data-reason="{{ fu.reason }}"
+                  data-date="{{ fu.follow_up_date }}"
+                  data-priority="{{ fu.priority }}"
+                  data-status="{{ fu.status }}"
+                  title="Edit Follow-up"
+                >
+                  Edit
+                </button>
+
+                <!-- Delete Button -->
+                <button 
+                  type="button" 
+                  class="btn btn-icon danger btn-confirm-delete"
+                  data-action="{{ url_for('crm.followup_delete', followup_id=fu.id) }}"
+                  data-title="follow-up task '{{ fu.reason }}'"
+                  title="Delete Follow-up"
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr class="no-records-row">
+            <td colspan="6">
+              <div class="empty-state">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h4>No Follow-ups Found</h4>
+                <p>No reminders match this filter. Schedule a new task to stay organized.</p>
+                <button type="button" class="btn btn-primary btn-sm" data-modal-open="addFollowupModal">
+                  + Schedule Follow-up
+                </button>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ====================================================================
+     ADD FOLLOW-UP MODAL
+     ==================================================================== -->
+<div class="modal-overlay" id="addFollowupModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">+ Schedule New Follow-up</h3>
+      <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+    </div>
+    <form action="{{ url_for('crm.followup_add') }}" method="POST">
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label class="form-label" for="add_fu_customer">Select Customer <span class="required">*</span></label>
+          <select id="add_fu_customer" name="customer_id" class="form-control" required>
+            <option value="" disabled selected>-- Choose Customer --</option>
+            {% for cust in customers %}
+              <option value="{{ cust.id }}">{{ cust.name }} ({{ cust.company or 'Direct' }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="add_fu_reason">Reason / Task Agenda <span class="required">*</span></label>
+          <input type="text" id="add_fu_reason" name="reason" class="form-control" placeholder="e.g. Call regarding revised quote approval" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="add_fu_date">Follow-up Date <span class="required">*</span></label>
+            <input type="date" id="add_fu_date" name="follow_up_date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="add_fu_priority">Priority</label>
+            <select id="add_fu_priority" name="priority" class="form-control">
+              <option value="Low">Low Priority</option>
+              <option value="Medium" selected>Medium Priority</option>
+              <option value="High">High Priority</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Schedule Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ====================================================================
+     EDIT FOLLOW-UP MODAL
+     ==================================================================== -->
+<div class="modal-overlay" id="editFollowupModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Follow-up Task</h3>
+      <button type="button" class="modal-close-btn" data-modal-close>&times;</button>
+    </div>
+    <form id="editFollowupForm" method="POST">
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label class="form-label" for="edit_followup_reason">Reason / Task Agenda <span class="required">*</span></label>
+          <input type="text" id="edit_followup_reason" name="reason" class="form-control" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit_followup_date">Scheduled Date <span class="required">*</span></label>
+            <input type="date" id="edit_followup_date" name="follow_up_date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit_followup_priority">Priority</label>
+            <select id="edit_followup_priority" name="priority" class="form-control">
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit_followup_status">Status</label>
+          <select id="edit_followup_status" name="status" class="form-control">
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
